@@ -82,6 +82,9 @@ public class AuthenticationController {
         try {
             UserDetails userDetails = (UserDetails) request.getAttribute(USER_DETAILS_KEY);
             User loggedInUser = (userService.findByEmail(userDetails.getUsername()));
+            if(loggedInUser.getId().equals(user.getId())){
+                throw new UserException("User cannot update his own details");
+            }
             Map<String, Object> m = userService.updateUser(user, loggedInUser);
             producer.sendMessage(userService.createLoginEventJson(user.getId().toString(), "Update User", "User details with email: " + user.getEmail() + " Updated").toString());
             return ResponseEntity.ok(m);
@@ -99,6 +102,9 @@ public class AuthenticationController {
         try {
             UserDetails userDetails = (UserDetails) request.getAttribute(USER_DETAILS_KEY);
             User loggedInUser = (userService.findByEmail(userDetails.getUsername()));
+            if(loggedInUser.getId().equals(Long.parseLong(id))){
+                throw new UserException("User cannot delete his own details");
+            }
             User userDel = this.userService.deleteUser(Long.parseLong(id), loggedInUser);
             producer.sendMessage(userService.createLoginEventJson(id, "Delete User", USER_EMAIL_WITH + userDel.getEmail() + " deleted").toString());
             return ResponseEntity.ok(Map.of(MESSAGE_KEY, USER_EMAIL_WITH + userDel.getEmail() + " deleted.", "email", userDel.getEmail(), "id", userDel.getId()));
