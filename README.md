@@ -28,6 +28,19 @@ Documentation
 • Document REST API endpoints.  
 • Document how to run and test the entire system.
 
+### 0 **Instructions for Setting Up Apache Kafka**
+
+| Download Kafka: wget https://downloads.apache.org/kafka/3.0.0/kafka\_2.13-3.0.0.tgztar \-xvf kafka\_2.13-3.0.0.tgzcd kafka\_2.13-3.0.0 Start Zookeeper: Open a terminal and run: .\\bin\\windows\\zookeeper-server-start.bat .\\config\\zookeeper.properties Start Kafka: In another terminal, execute: .\\bin\\windows\\kafka-server-start.bat .\\config\\server.properties Read Events Pushed to Kafka: To read events from the user\_event topic, run: .\\bin\\windows\\kafka-console-consumer.bat \--bootstrap-server localhost:9092 \--topic user\_event \--partition 0 \--offset 0 |
+| :---- |
+
+**Navigate to Your Project Directory**: Open your terminal and change to the directory where your Spring project is located.  
+**Build the Project**: Use the Gradle Wrapper to build your project.
+
+| .\\gradlew.bat build |
+| :---- |
+
+### 
+
 ### 1 Post-Deployment Scripts:
 
 | —-Create databases CREATE DATABASE journal; CREATE DATABASE user\_db; —-Insert ROLE\_ADMIN in db:	INSERT INTO \`user\_db\`.\`role\` 	( \`is\_deleted\`, name\`)	VALUES(FALSE,'ROLE\_ADMIN');\---Insert Super user in db:	INSERT INTO \`user\_db\`.\`user\` 	( \`email\`, \`first\_name\`, \`is\_deleted\`, \`last\_name\`, \`password\`, \`role\_id\`)	values('superuser@gemail.com', 'superuser', FALSE, 'super', 	'$2a$10$RGQHNlWHsAwDKqOA5Z1y1OpdLx1vww8kwEql3TbzDuTVvHQMt1gwa\`role\`', 	(SELECT id FROM \`user\_db\`.\`role\` WHERE \`name\`='ADMIN')); |
@@ -67,7 +80,7 @@ This structure simplifies role management by ensuring that each user is linked t
 6. Process User Creation:  
    * The server validates the input, hashes the password, and stores the new user in the database.
 
-#### **2.3. User Registration:**  **User registration is the process through which new users create an account on a system or application. It typically involves collecting user information, validating it, and storing it securely in a database.**
+#### **2.3. User Registration:**  User registration is the process through which new users create an account on a system or application. It typically involves collecting user information, validating it, and storing it securely in a database.
 
 ##### 2.3.1 Access User Creation Interface
 
