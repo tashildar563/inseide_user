@@ -20,14 +20,6 @@ Journal Service
 * Implement RESTful API endpoints to retrieve journals.  
 * Incorporate role-based access control to retrieve journals.
 
-Good to have  
-• Unit tests  
-• Integration tests  
-Documentation  
-• Create docker compose file to run the entire system.  
-• Document REST API endpoints.  
-• Document how to run and test the entire system.
-
 ### 0 **Instructions for Setting Up Apache Kafka**
 
 | Download Kafka: wget https://downloads.apache.org/kafka/3.0.0/kafka\_2.13-3.0.0.tgztar \-xvf kafka\_2.13-3.0.0.tgzcd kafka\_2.13-3.0.0 Start Zookeeper: Open a terminal and run: .\\bin\\windows\\zookeeper-server-start.bat .\\config\\zookeeper.properties Start Kafka: In another terminal, execute: .\\bin\\windows\\kafka-server-start.bat .\\config\\server.properties Read Events Pushed to Kafka: To read events from the user\_event topic, run: .\\bin\\windows\\kafka-console-consumer.bat \--bootstrap-server localhost:9092 \--topic user\_event \--partition 0 \--offset 0 |
