@@ -2,7 +2,7 @@ package com.user.inside_user.security;
 
 import com.user.inside_user.security.jwtAuth.AuthTokenFilter;
 import com.user.inside_user.security.jwtAuth.JwtAuthEntryPoint;
-import com.user.inside_user.security.user.UserDetailService;
+import com.user.inside_user.security.user.UsersDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig {
     @Autowired
-    private UserDetailService userDetailsService;
+    private UsersDetailService userDetailsService;
     @Autowired
     private JwtAuthEntryPoint jwtAuthEntryPoint;
 
@@ -82,7 +82,7 @@ public class WebSecurityConfig {
                             .requestMatchers("/users/delete/**").hasAnyRole("ADMIN")
                             .requestMatchers("/users/**").hasAnyRole("ADMIN","USER_ONE")
                             .requestMatchers("/inside_user/roles/delete/**").hasAnyRole("ADMIN")
-                            .requestMatchers("/inside_user/roles/all-roles").hasAnyRole("ADMIN","USER_ONE")
+//                            .requestMatchers("/inside_user/roles/all-roles").hasAnyRole("ADMIN","USER_ONE")
                             .anyRequest().authenticated();  // All other requests require authentication
                 });
         http.authenticationProvider(this.authenticationProvider());

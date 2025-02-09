@@ -2,11 +2,10 @@ package com.user.inside_user.controller;
 import com.user.inside_user.Exception.UserException;
 import com.user.inside_user.Request.LoginRequest;
 import com.user.inside_user.entities.User;
-import com.user.inside_user.kafka.Producer;
 import com.user.inside_user.response.JwtResponse;
 import com.user.inside_user.security.jwtAuth.JwtUtils;
 import com.user.inside_user.security.user.UserDetail;
-import com.user.inside_user.service.UserService;
+import com.user.inside_user.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
@@ -19,6 +18,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,13 +39,12 @@ public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
-    private final Producer producer;
+//    private final Producer producer;
 
-    public AuthenticationController(UserService userService, AuthenticationManager authenticationManager, JwtUtils jwtUtils, Producer producer) {
+    public AuthenticationController(UserService userService, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-        this.producer = producer;
     }
     private static final String MESSAGE_KEY = "message";
     private static final String USER_DETAILS_KEY = "userDetails";
@@ -58,7 +58,11 @@ public class AuthenticationController {
             this.userService.registerUser(user, loggedInUser.getId());
             JSONObject details;
             details=this.userService.createLoginEventJson(user.getId().toString(), "User Registration", USER_EMAIL_WITH + user.getEmail() + " Registered.");
-            producer.sendMessage(details.toString());
+//            producer.sendMessage(details.toString());
+            /*
+            * Observer Design Pattern implemented*/
+            notifyToOtherEmployees(user);
+            /*=============================*/
             return ResponseEntity.ok(Map.of("id", user.getId(), "firstName", user.getFirstName(), "lastName", user.getLastName(), "email", user.getEmail(), "role", user.getRole().getName(), "status", USER_EMAIL_WITH + user.getEmail() + " Registered."));
         } catch (UserException var3) {
             UserException e = var3;
@@ -66,14 +70,25 @@ public class AuthenticationController {
         }
     }
 
+    private void notifyToOtherEmployees(User user) {
+        NotificationService notificationService=new NotificationService();
+        Observer smsObservers=new SMSService();
+        Observer emailObservers=new EmailService();
+        notificationService.addObserver(smsObservers);
+        notificationService.addObserver(emailObservers);
+        notificationService.sendMsg("User:"+user.getFirstName()+" "+user.getLastName()+" is new addition to the team");
+    }
+
     @PostMapping({"/login"})
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody @Valid LoginRequest request) {
-        Authentication authentication = this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(request.getEmail(), encoder.encode(request.getPassword()));
+        Authentication authentication = this.authenticationManager.authenticate(userToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = this.jwtUtils.generateJwtTokenForUser(authentication);
         UserDetail userDetails = (UserDetail) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-        producer.sendMessage(userService.createLoginEventJson(userDetails.getId().toString(), "Login", USER_EMAIL_WITH + userDetails.getEmail() + "logged in").toString());
+//        producer.sendMessage(userService.createLoginEventJson(userDetails.getId().toString(), "Login", USER_EMAIL_WITH + userDetails.getEmail() + "logged in").toString());
         return ResponseEntity.ok(new JwtResponse(userDetails.getId(), userDetails.getEmail(), jwt, roles));
     }
 
@@ -86,7 +101,7 @@ public class AuthenticationController {
                 throw new UserException("User cannot update his own details");
             }
             Map<String, Object> m = userService.updateUser(user, loggedInUser);
-            producer.sendMessage(userService.createLoginEventJson(user.getId().toString(), "Update User", "User details with email: " + user.getEmail() + " Updated").toString());
+//            producer.sendMessage(userService.createLoginEventJson(user.getId().toString(), "Update User", "User details with email: " + user.getEmail() + " Updated").toString());
             return ResponseEntity.ok(m);
         } catch (UsernameNotFoundException var3) {
             UsernameNotFoundException e = var3;
@@ -106,7 +121,7 @@ public class AuthenticationController {
                 throw new UserException("User cannot delete his own details");
             }
             User userDel = this.userService.deleteUser(Long.parseLong(id), loggedInUser);
-            producer.sendMessage(userService.createLoginEventJson(id, "Delete User", USER_EMAIL_WITH + userDel.getEmail() + " deleted").toString());
+//            producer.sendMessage(userService.createLoginEventJson(id, "Delete User", USER_EMAIL_WITH + userDel.getEmail() + " deleted").toString());
             return ResponseEntity.ok(Map.of(MESSAGE_KEY, USER_EMAIL_WITH + userDel.getEmail() + " deleted.", "email", userDel.getEmail(), "id", userDel.getId()));
         } catch (UsernameNotFoundException var3) {
             UsernameNotFoundException e = var3;

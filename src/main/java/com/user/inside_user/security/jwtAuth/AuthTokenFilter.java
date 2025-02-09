@@ -2,7 +2,7 @@ package com.user.inside_user.security.jwtAuth;
 
 
 
-import com.user.inside_user.security.user.UserDetailService;
+import com.user.inside_user.security.user.UsersDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
-    private UserDetailService userDetailsService;
+    private UsersDetailService userDetailsService;
     private static final Logger log = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     public AuthTokenFilter() {

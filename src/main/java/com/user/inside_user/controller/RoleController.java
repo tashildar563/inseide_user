@@ -29,13 +29,12 @@ import java.util.List;
 public class RoleController {
     private final RoleService roleService;
     private final UserService userService;
-    private final Producer producer;
+//    private final Producer producer;
 
     @Autowired
-    public RoleController(RoleService roleService, UserService userService, Producer producer) {
+    public RoleController(RoleService roleService, UserService userService) {
         this.roleService = roleService;
         this.userService = userService;
-        this.producer = producer;
     }
 
     @GetMapping({"/all-roles"})
@@ -62,7 +61,6 @@ public class RoleController {
             UserDetails userDetails = (UserDetails) request.getAttribute("userDetails");
             User user = (userService.findByEmail(userDetails.getUsername()));
             theRole = this.roleService.createRole(theRole, String.valueOf(user.getId()));
-            producer.sendMessage(userService.createLoginEventJson(theRole.getId().toString(), "Role Creation", "Role with name: " + theRole.getName() + "Created.").toString());
             return ResponseEntity.ok(new RoleResponse(theRole.getId(), theRole.getName(), theRole.getDescription(), "New role created successfully!"));
         } catch (RoleAlreadyExistException var3) {
             RoleAlreadyExistException re = var3;
@@ -78,7 +76,6 @@ public class RoleController {
             roleCode = "ROLE_" + roleCode;
             Role role = this.roleService.findOneByName(roleCode);
             this.roleService.deleteRoleByCode(roleCode, String.valueOf(user.getId()));
-            producer.sendMessage(userService.createLoginEventJson(role.getId().toString(), "Role Deletion", "Role with code: " + role.getName() + "Deleted.").toString());
             return ResponseEntity.ok(new RoleResponse(role.getId(), role.getName(), role.getDescription(), "Role deleted successfully!"));
         } catch (RoleAlreadyExistException var3) {
             RoleAlreadyExistException re = var3;
